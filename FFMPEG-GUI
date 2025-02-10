@@ -1,0 +1,63 @@
+1. Install KDialog (if not already installed)
+Ensure KDialog is available by running:
+
+sudo zypper install kdialog
+2. Modify the Script to Use a GUI
+Update your script to allow file selection via KDialog:
+
+#!/bin/bash
+
+output_dir="$HOME/Videos/converted_videos"
+mkdir -p "$output_dir"
+
+input_files=$(kdialog --getopenfilename "$HOME" "*.mp4" --multiple --separate-output)
+if [[ -z "$input_files" ]]; then
+    kdialog --error "No files selected. Exiting."
+    exit 1
+fi
+
+framerate=$(kdialog --combobox "Select framerate:" "30" "60" --default "30")
+if [[ "$framerate" != "30" && "$framerate" != "60" ]]; then
+    kdialog --error "Invalid framerate. Must be 30 or 60."
+    exit 1
+fi
+
+for input_file in $input_files; do
+    output_file="${output_dir}/$(basename "${input_file%.*}").mov"
+    kdialog --title "Processing" --passivepopup "Converting: $(basename "$input_file")"
+    ffmpeg -i "$input_file" -map 0:v -map 0:a? -c:v dnxhd -b:v 36M -pix_fmt yuv422p -s 1920x1080 -r "$framerate" -c:a pcm_s16le -f mov "$output_file"
+    kdialog --title "Success" --passivepopup "Finished: $(basename "$output_file")"
+    done
+
+kdialog --msgbox "All conversions completed! Files saved in $output_dir"
+3. Make the Script Executable
+Save this as ~/.local/bin/convert_videos.sh and set permissions:
+
+chmod +x ~/.local/bin/convert_videos.sh
+4. Create a KDE Desktop Launcher
+Create a .desktop file:
+
+nano ~/.local/share/applications/convert_videos.desktop
+Copy and paste:
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Convert Videos
+Comment=Convert MP4 files to MOV using DNxHD
+Exec=~/.local/bin/convert_videos.sh
+Icon=video-x-generic
+Terminal=false
+Categories=AudioVideo;Video;
+5. Make the .desktop File Executable
+chmod +x ~/.local/share/applications/convert_videos.desktop
+6. Test the Launcher
+Open your application menu, search for Convert Videos, and click the icon to launch.
+
+If it doesn't appear, restart your session (logout & login).
+
+Additional Enhancements
+Change the Icon: Replace Icon=video-x-generic with a custom .png icon.
+Run Without Terminal: Set Terminal=false and modify Exec for a GUI dialog.
+Add to Desktop: Copy the launcher to ~/Desktop/ and make it executable.
+Now you have a KDE-integrated GUI desktop application!
