@@ -2,6 +2,7 @@
 Ensure KDialog is available by running:
 
 sudo zypper install kdialog
+
 2. Modify the Script to Use a GUI
 Update your script to allow file selection via KDialog:
 
@@ -30,10 +31,14 @@ for input_file in $input_files; do
     done
 
 kdialog --msgbox "All conversions completed! Files saved in $output_dir"
+
+
 3. Make the Script Executable
 Save this as ~/.local/bin/convert_videos.sh and set permissions:
 
 chmod +x ~/.local/bin/convert_videos.sh
+
+
 4. Create a KDE Desktop Launcher
 Create a .desktop file:
 
