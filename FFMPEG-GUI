@@ -51,11 +51,15 @@ Type=Application
 Name=Convert Videos
 Comment=Convert MP4 files to MOV using DNxHD
 Exec=~/.local/bin/convert_videos.sh
-Icon=video-x-generic
+Icon=/home/yourusername/.local/share/icons/GUMSHOE_dot_Tech_Youtube.jpg
 Terminal=false
 Categories=AudioVideo;Video;
+
+
 5. Make the .desktop File Executable
 chmod +x ~/.local/share/applications/convert_videos.desktop
+
+
 6. Test the Launcher
 Open your application menu, search for Convert Videos, and click the icon to launch.
 
