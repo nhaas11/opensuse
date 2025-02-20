@@ -1,0 +1,146 @@
+Opensuse Post install configuration guide.
+
+1. Make Zypper Faster (Possibly, if you have a fast Internet Connection)
+    Open the zypp.conf file for editing:
+
+    sudo vi /etc/zypp/zypp.conf
+    Find or add these lines to enable parallel downloads:
+
+    #download.max_concurrent_connections = 5
+    #download.multicurl = true: Enables parallel downloads using curl. NOPE
+    download.max_concurrent_connections = 10: Sets the number of parallel downloads (increase if needed).
+
+2. Update Your New System
+
+    After installing any distro, not just OpenSUSE, it’s advisable updating the system to take advantage of the latest and greatest features.
+    In OpenSUSE, the following command is used to update the system:
+    sudo zypper ref && sudo zypper up
+    Also, if you are running OpenSUSE Tumbleweed, which is a rolling distro, make sure to run the following command to make sure that your distro version is up to date:
+
+    sudo zypper refresh
+    sudo zypper dup
+
+3. Create your first Snapshot!
+    Linux users are known for their passion for tinkering with distros. However, before doing any modifications to the system settings, make sure to have a backup of your system. OpenSUSE is one of the best Linux distros in this regard as it allows you to create multiple system snapshots with its BTRFS file system.
+    We can create a system snapshot with the following:
+
+    Open Yast → Filesystem Snapshots → Create → Fill in the fields → OK
+
+4. Change your HOST Name
+    Yast, Network Settings -->Host
+
+5. Network Discover Printers.
+
+6. Install Any Drivers you are missing (HELLO NVIDEA)
+    https://www.opensuse-community.org/
+    Drivers are necessary to every system since they allow the system to take full advantage of the hardware. For example, a driver for the Nvidia graphics card can easily be installed with one-click-install at OpenSUSE Community.
+
+    If you don’t know which driver to install, make sure to get the model of your graphics card by executing the following command:
+
+    sudo hwinfo --gfxcard | grep Model
+
+7. Add A Community Repositories
+
+    By default, OpenSUSE has only official packages included in the repositories. However, the default list of packages is limited and you likely won’t find everything you need.
+    That’s where community repositories (https://www.opensuse-community.org/) come in. The most important one, in my opinion, is Packman.
+    We can add the Packman repository with Yast:
+    Open Yast → Software Repositories → Add → Select Community Repositories → Next → Select Packman Repository → OK
+    OR we can fix it by adding a custom URL of one of the working community repositories mirrors: http://packman.links2linux.org/mirrors
+    Open Yast → Software Repositories → Add → Select Specify URL → Next → Type URL of the selected mirror → Next → OK
+    OpenSUSE adding Packman community repository
+    Alternatively, you can add the Pakman repository from the command line:
+
+    on Tumbleweed
+    sudo zypper ar -cfp 90 https://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Tumbleweed/ packman
+
+    Leap
+    sudo zypper ar -cfp 90 'https://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Leap_$releasever/' packman
+    Lastly, to make changes take effect regardless if you used the command line or Yast, run:
+
+    sudo zypper dup --allow-vendor-change
+
+
+
+8. Install Microsoft Fonts (Trust Me!)
+    Similar to codecs, Microsoft fonts don’t come pre-installed either. The absence of Microsoft fonts (e.g. Arial, Times New Roman, Comic Sans) will likely cause you issues if you work with Microsoft Office files frequently.
+    We can install all of them from the previously added Packman repository:
+    Open Yast → Software Management → Search for fetchmsttfonts → Right-click → Install → Accept
+
+9. Decrease Your GRUB Delay (That On Boot Countdown Timmer)
+    Starting the system with OpenSUSE shows the GRUB menu each time prompting you to select the system to boot or wait 8 seconds. If OpenSUSE is the only system on your machine, it makes sense to remove the menu from showing up on boot and speed up the boot process by 8 seconds.
+    Open Yast → Boot Loader → Bootloader Options → Set timeout to 1 → OK (I suggest no using 0, there are some addvantages to leaving it at 1)
+
+10. Change the Single Click to Open Files
+    Plasma 5 opens files/folders on single-click by default. However, most people (including me) prefer a double-click which can be enabled in Settings.
+    Open System Settings → Workspace Behavior → Enable “Click files or folders - Selects them”
+
+    6. Install Codecs!
+    Codecs allow you to play various media formats on your Linux machine. They are not included by default due to some legal concerns. To be able to play all popular media files, I recommend you to install these additional codecs.
+    Once again, we can install them with a single-click-install using the buttons below. If some of these buttons do not work, visit OpenSUSE Community website.
+
+    sudo zypper install opi
+
+    opi codecs
+
+
+11. Change Behavior of Opening a RPM
+    OpenSUSE opens RPM packages as an archive with Ark by default instead of Yast, which allows you to install them. Fortunately, it’s very easy to correct this behavior.
+    Select any RPM package → Right-click → Properties → File Type Options → Move Yast to the first place → Apply
+
+12. Install Google Chrome
+
+    I am familiar with the fact that not everyone is a fan of Firefox. I Dont use it, Thus, I will show you how to install the Google Chrome browser.
+    Go to Chrome’s website (https://www.google.com/chrome/) and download an RPM package. After downloading, double-click on it and install it with Yast.
+
+    Install Google Chrome on openSUSE
+
+    Everything is already in place for the actual installation. Now, to install Chrome on your openSUSE system, run the following Zypper command:
+
+    sudo zypper install google-chrome-stable
+    Once installed, launch the Chrome web browser from your app launcher and enjoy it.
+
+13. Turn on eye strain savior, Night Color
+    Night color reduces the amount of blue light at night. This is better for your eyes and helps you to fall asleep easier. Night Color is a built-in feature of the Plasma 5 desktop and it just needs to be enabled:
+    Open System Settings → Display and Monitor → Night Color → Activate Night Color → Apply - I tell in to Set Sunset to Sunrise and my Location (I set the Location!).
+
+
+14. Install a Audio Player
+    OpenSUSE includes VLC as its media player of choice. VLC is a video player that happens to support playing other media as well. Nevertheless, I prefer to have a dedicated app for playing audio files over the “one size fits all” solutions.
+    When it comes to audio players, there are many options to choose from, but my favorite one has always been Clementine Music Player.
+    Open Yast → Software Management → Search for clementine → Right-click → Install → Accept
+
+
+
+15. Change Task Switchers
+    The default Task Switcher (Alt + TAB) on Plasma 5 desktop is shown as the panel on the left side of the screen and it switches between focused windows. I prefer a switcher with icons and no focus on window selection. Maybe you will love it too! Just try:
+    Open System Settings → Window Management → Task Switcher → Select large icons (without selected window) → Apply
+
+16. To setup Flatpak with Discover on openSUSE, you need to install the "flatpak" package using your package manager (zypper), then install the "discover-backend-flatpak" package which allows Discover to manage Flatpak applications, and        finally add the Flathub repository to access Flatpak applications within Discover.
+    Steps:
+    Install Flatpak:
+    Open a terminal and run: sudo zypper install flatpak.
+    Install Discover Flatpak Backend:
+    Run: sudo zypper install discover-backend-flatpak
+    Add Flathub Repository:
+    Once installed, add the Flathub repository to your system by running: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+Optional:
+
+17 Install Java
+
+    I Dont have a use for Java, but it is a very popular programming language and many programs depend on it to run. Thus, it’s critical to make sure that it’s installed.
+    _Open Yast → Search for java- → Make sure that you have java--openjdk package installed_
+    Furthermore, some web applications require a special Java plugin icedtea which can be installed by following the same steps:
+    Open Yast → Search for icedtea- → Select it and install
+
+18. If you find you have Sound Issues.
+    https://en.opensuse.org/SDB:Firefox_MP4/H.264_Video_Support
+    The “sof-firmware” package contains the “Sound Open Firmware” firmware data files for SOF support – in place of the vendor-supplied firmware which is normally used.
+
+
+19. Decrease Swappiness (Is this a word?)
+    If you Have 8 gigs of RAM OR LESS change this setting. If you have 16, 32 gigs of RAM and MORE Dont do this, there is no effect. Alot of people that have SSD's, this change will save writes - Not really...
+
+    The default swappiness is 60. What bothered me about it is that, whenever the system gets past roughly 6 GB of used memory, it begins filling the SWAP at once. With some software it can reach and stay at over 9 GB of RAM for a while, which in a few hours causes the SWAP to be filled up to 100 MB. This is pretty fast for barely exceeding half of my available RAM! As this makes rather nervous I decided to edit /etc/sysctl.conf and readd the commonly recommended vm.swappiness = 10 at the end.
+
+
