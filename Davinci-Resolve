@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# Predefined list of packages to check
+PREDEFINED_PACKAGES=("libapr1" "libOpenCL" "libpango-1.0" "gestreamer-plugin-{good,bad,ugly,libav}" "ffmpeg" "libavcodec" "vlc-codecs")
+pens
+
+# Function to check openSUSE version
+check_opensuse_version() {
+    if [[ -f /etc/os-release ]]; then
+        local version_info
+        version_info=$(grep -E '^PRETTY_NAME=' /etc/os-release | cut -d= -f2 | tr -d '"')
+        echo "🖥️ Running on: $version_info"
+    else
+        echo "⚠️ Unable to determine the openSUSE version. File '/etc/os-release' is missing."
+    fi
+}
+
+# Function to add the Packman repository
+add_packman_repository() {
+    # Detect openSUSE version
+    OS_VERSION=$(grep "^VERSION_ID" /etc/os-release | cut -d '"' -f 2)
+
+    if [[ -z "$OS_VERSION" ]]; then
+        echo "Unable to detect openSUSE version."
+        exit 1
+    fi
+
+    # Check if Packman repository is already added
+    if zypper lr | grep -q "packman"; then
+        echo "✅ Packman repository is already added."
+    else
+        # Add Packman repository
+        echo "Adding Packman repository for openSUSE Leap $OS_VERSION..."
+
+        sudo zypper ar -cfp 90 \
+            http://packman.inode.at/suse/openSUSE_Leap_${OS_VERSION}/ \
+            packman
+
+        # Refresh repositories
+        echo "Refreshing repositories..."
+        sudo zypper refresh
+
+        # Optional: Switch system packages to Packman
+        echo "Switching system packages to Packman..."
+        sudo zypper dup --from packman --allow-vendor-change
+
+        echo "Packman repository added successfully!"
+    fi
+}
+
+# Function to check if a specific package is installed
+check_package() {
+    local package_name=$1
+    local package_info
+
+    # Search for the package in the installed list
+    package_info=$(zypper se -i "$package_name" 2>/dev/null | grep "^i" | awk '{print $3}')
+    if [[ -n $package_info ]]; then
+        echo "✅ Package '$package_name' is installed (version: $package_info)."
+    else
+        # Check if the package is available in the repository
+        if zypper se "$package_name" &>/dev/null; then
+            echo "⚠️ Package '$package_name' is NOT installed but is available in the repository."
+        else
+            echo "❌ Package '$package_name' is NOT installed and not available in the repository."
+        fi
+    fi
+}
+
+# Function to check predefined packages
+check_predefined_packages() {
+    echo "Checking the status of predefined packages:"
+    for pkg in "${PREDEFINED_PACKAGES[@]}"; do
+        echo "----------------------------------"
+        check_package "$pkg"
+    done
+}
+
+# Function to check multiple packages provided by the user
+check_multiple_packages() {
+    local packages=("$@")
+    echo "Checking the status of specified packages:"
+    for pkg in "${packages[@]}"; do
+        echo "----------------------------------"
+        check_package "$pkg"
+    done
+}
+
+# Function to list all installed packages
+list_installed_packages() {
+    echo "Listing all installed packages:"
+    zypper se -i | grep "^i" | awk '{print $3}'
+}
+
+# Main script logic
+echo "🔍 OpenSUSE Package Checker and Packman Repository Adder"
+
+# Check and display the openSUSE version
+check_opensuse_version
+
+if [[ $1 == "add-packman" ]]; then
+    add_packman_repository
+elif [[ $1 == "list" ]]; then
+    list_installed_packages
+elif [[ $1 == "check" ]]; then
+    if [[ -z $2 ]]; then
+        check_predefined_packages
+    else
+        shift
+        check_multiple_packages "$@"
+    fi
+else
+    echo "Usage:"
+    echo "  $0 add-packman                  - Add the Packman repository and switch system packages"
+    echo "  $0 list                          - List all installed packages"
+    echo "  $0 check                         - Check the status of predefined packages"
+    echo "  $0 check  [...]   - Check the status of specific packages"
+fi
